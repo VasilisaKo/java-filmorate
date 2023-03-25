@@ -1,18 +1,18 @@
 package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FilmControllerTest {
-    private FilmController controller = new FilmController();
+    private final InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
     private Film film;
-
     @Test
     void emptyNameExceptionTest() {
 
@@ -23,10 +23,11 @@ public class FilmControllerTest {
                 120);
         final ValidationException exception = assertThrows(
                 ValidationException.class,
-                () -> controller.create(film)
+                () -> filmStorage.create(film)
         );
         assertEquals("Название фильма не может быть пустым.", exception.getMessage());
     }
+
     @Test
     void longDescriptionExceptionTest() {
         film = new Film(
@@ -44,10 +45,11 @@ public class FilmControllerTest {
 
         final ValidationException exception = assertThrows(
                 ValidationException.class,
-                () -> controller.create(film)
+                () -> filmStorage.create(film)
         );
         assertEquals("Максимальная длина описания — 200 символов.", exception.getMessage());
     }
+
     @Test
     void releaseDayExceptionTest() {
         film = new Film(
@@ -58,10 +60,11 @@ public class FilmControllerTest {
 
         final ValidationException exception = assertThrows(
                 ValidationException.class,
-                () -> controller.create(film)
+                () -> filmStorage.create(film)
         );
         assertEquals("Дата релиза — не раньше 28 декабря 1895 года.", exception.getMessage());
     }
+
     @Test
     void notPositiveDurationExceptionTest() {
         film = new Film(
@@ -72,7 +75,7 @@ public class FilmControllerTest {
 
         final ValidationException exception = assertThrows(
                 ValidationException.class,
-                () -> controller.create(film)
+                () -> filmStorage.create(film)
         );
         assertEquals("Продолжительность фильма должна быть положительной.", exception.getMessage());
     }
