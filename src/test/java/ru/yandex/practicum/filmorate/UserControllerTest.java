@@ -1,77 +1,68 @@
 package ru.yandex.practicum.filmorate;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDate;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+@SpringBootTest
+@AutoConfigureMockMvc
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class UserControllerTest {
-    private User user;
-    private final InMemoryUserStorage userStorage = new InMemoryUserStorage();
 
-    @Test
-    void emptyOrIncorrectEmailExceptionTest() {
-        user = new User(
+    @Autowired
+    private MockMvc mockMvc;
 
-                1,
-                "vasilisagmail.com",
-                "vasilisa",
-                "Vasilisa",
-                LocalDate.of(1986, 10, 20));
-        var exception = assertThrows(
-                ValidationException.class,
-                () -> userStorage.create(user)
-        );
-        assertEquals("Электронная почта не может быть пустой и должна содержать символ @.", exception.getMessage());
+    @BeforeEach
+    public void setUp() throws Exception {
+        mockMvc.perform(post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"login\":\"vasilisaKo\",\"name\":\"vasilisa\",\"email\":\"vasilisa@gmail.com\"," +
+                        "\"birthday\":\"1986-10-20\"}"));
     }
 
     @Test
-    void emptyOrContainSpaceLoginExceptionTest() {
-        user = new User(
-
-                1,
-                "vasilisa@gmail.com",
-                "vasi lisa",
-                "Vasilisa",
-                LocalDate.of(1986, 10, 20));
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> userStorage.create(user)
-        );
-        assertEquals("Логин не может быть пустым и содержать пробелы.", exception.getMessage());
+    void emptyOrIncorrectEmailExceptionTest() throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"login\":\"vasilisa Ko\",\"name\":\"vasilisa\",\"email\":\"vasilisa@gmail.com\"," +
+                                "\"birthday\":\"1986-10-20\"}"))
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
-    void incorrectBirthdayExceptionTest() {
-        user = new User(
-
-                1,
-                "vasilisa@gmail.com",
-                "vasilisa",
-                "Vasilisa",
-                LocalDate.now().plusDays(1));
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> userStorage.create(user)
-        );
-        assertEquals("Дата рождения не может быть в будущем.", exception.getMessage());
+    void emptyOrContainSpaceLoginExceptionTest() throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"login\":\"vasilisaKo\",\"name\":\"vasilisa\",\"email\":\"vasilisagmail.com\"," +
+                                "\"birthday\":\"1986-10-20\"}"))
+                .andExpect(status().is4xxClientError());
     }
 
-   @Test
-    void emptyNameShouldreplaceByLogenTest() {
-        user = new User(
+    @Test
+    void incorrectBirthdayExceptionTest() throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"login\":\"vasilisaKo\",\"name\":\"vasilisa\",\"email\":\"vasilisa@gmail.com\"," +
+                                "\"birthday\":\"2030-10-20\"}"))
+                .andExpect(status().is4xxClientError());
+    }
 
-                1,
-                "vasilisa@gmail.com",
-                "vasilisa",
-                "",
-                LocalDate.of(1986, 10, 20));
-        User user1 = userStorage.create(user);
-
-        assertEquals(user1.getName(), user1.getLogin());
+    @Test
+    void emptyNameShouldreplaceByLogenTest() throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"login\":\"vasilisa\",\"email\":\"vasilisa@gmail.com\"," +
+                                "\"birthday\":\"1986-10-20\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("vasilisa"));
     }
 }

@@ -1,83 +1,70 @@
 package ru.yandex.practicum.filmorate;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDate;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
-
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+@SpringBootTest
+@AutoConfigureMockMvc
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class FilmControllerTest {
-    private final InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
-    private Film film;
-    @Test
-    void emptyNameExceptionTest() {
+    @Autowired
+    private MockMvc mockMvc;
+    @BeforeEach
+    public void setUp() throws Exception {
+        mockMvc.perform(post("/films")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"HarryPotter\",\"description\":\"Wizard Boy\",\"releaseDate\":\"2000-01-01\"," +
+                        "\"duration\":100}"));
+    }
 
-        film = new Film(
-                "",
-                "Description",
-                LocalDate.of(2010, 11, 15),
-                120);
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> filmStorage.create(film)
-        );
-        assertEquals("Название фильма не может быть пустым.", exception.getMessage());
+   @Test
+    void emptyNameExceptionTest() throws Exception {
+        mockMvc.perform(post("/films")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"\",\"description\":\"Wizard Boy\",\"releaseDate\":\"2000-01-01\"," +
+                                "\"duration\":200}"))
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
-    void longDescriptionExceptionTest() {
-        film = new Film(
-                "Film",
-                "Жизнь десятилетнего Гарри Поттера нельзя назвать сладкой: родители умерли, едва ему " +
-                        "исполнился год, а от дяди и тёти, взявших сироту на воспитание, достаются лишь тычки " +
-                        "да подзатыльники. Но в одиннадцатый день рождения Гарри всё меняется. Странный гость, " +
-                        "неожиданно появившийся на пороге, приносит письмо, из которого мальчик узнаёт, " +
-                        "что на самом деле он - волшебник и зачислен в школу магии под названием Хогвартс. А уже " +
-                        "через пару недель Гарри будет мчаться в поезде Хогвартс-экспресс навстречу новой жизни, " +
-                        "где его ждут невероятные приключения, верные друзья и самое главное — ключ к разгадке тайны " +
-                        "смерти его родителей.",
-                LocalDate.of(2010, 11, 15),
-                120);
+    void longDescriptionExceptionTest() throws Exception {
+        mockMvc.perform(post("/films")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Гарри Поттер\",\"description\":\"Жизнь десятилетнего Гарри Поттера нельзя " +
+                                "назвать сладкой: родители умерли, едва ему исполнился год, а от дяди и тёти, взявших" +
+                                "сироту на воспитание, достаются лишь тычки да подзатыльники. Но в одиннадцатый день " +
+                                "рождения Гарри всё меняется. Странный гость, неожиданно появившийся на пороге, " +
+                                "приносит письмо, из которого мальчик узнаёт, что на самом деле он - волшебник и " +
+                                "зачислен в школу магии под названием Хогвартс. А уже через пару недель Гарри будет " +
+                                "мчаться в поезде Хогвартс-экспресс навстречу новой жизни, где его ждут невероятные " +
+                                "приключения, верные друзья и самое главное — ключ к разгадке тайны смерти его " +
+                                "родителей.\",\"releaseDate\":\"2000-01-01\",\"duration\":200}"))
+                .andExpect(status().is4xxClientError());
+    }
 
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> filmStorage.create(film)
-        );
-        assertEquals("Максимальная длина описания — 200 символов.", exception.getMessage());
+
+    @Test
+    void releaseDayExceptionTest() throws Exception {
+        mockMvc.perform(post("/films").
+                        contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"HarryPotter\"," +
+                                "\"description\":\"Wizard Boy\",\"releaseDate\":\"1895-12-27\",\"duration\":100}"))
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
-    void releaseDayExceptionTest() {
-        film = new Film(
-                "Film",
-                "Description",
-                LocalDate.of(1895, 12, 27),
-                120);
-
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> filmStorage.create(film)
-        );
-        assertEquals("Дата релиза — не раньше 28 декабря 1895 года.", exception.getMessage());
-    }
-
-    @Test
-    void notPositiveDurationExceptionTest() {
-        film = new Film(
-                "Film",
-                "Description",
-                LocalDate.of(2010, 11, 15),
-                0);
-
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> filmStorage.create(film)
-        );
-        assertEquals("Продолжительность фильма должна быть положительной.", exception.getMessage());
+    void notPositiveDurationExceptionTest() throws Exception {
+        mockMvc.perform(post("/films").
+                        contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"HarryPotter\"," +
+                                "\"description\":\"Wizard Boy\",\"releaseDate\":\"2000-01-01\",\"duration\":-100}"))
+                .andExpect(status().is4xxClientError());
     }
 }
 
