@@ -41,7 +41,7 @@ public class UserController {
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        if (user.getLogin().contains(" ")){
+        if (user.getLogin().contains(" ")) {
             log.error("Логин не может содержать пробелы.");
             throw new ValidationException("Логин не может содержать пробелы.");
         }
@@ -53,7 +53,7 @@ public class UserController {
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        if (user.getLogin().contains(" ")){
+        if (user.getLogin().contains(" ")) {
             log.error("Логин не может содержать пробелы.");
             throw new ValidationException("Логин не может содержать пробелы.");
         }
