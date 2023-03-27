@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
@@ -39,12 +40,26 @@ public class UserController {
     }
 
     @PostMapping
-    public User create(@RequestBody User user) {
+    public User create(@Valid @RequestBody User user) {
+        if (user.getLogin().contains(" ")){
+            log.error("Логин не может содержать пробелы.");
+            throw new ValidationException("Логин не может содержать пробелы.");
+        }
+        if (user.getName() == null || user.getName().isEmpty()) {
+            user.setName(user.getLogin());
+        }
         return userStorage.create(user);
     }
 
     @PutMapping
-    public User update(@RequestBody User user) {
+    public User update(@Valid @RequestBody User user) {
+        if (user.getLogin().contains(" ")){
+            log.error("Логин не может содержать пробелы.");
+            throw new ValidationException("Логин не может содержать пробелы.");
+        }
+        if (user.getName() == null || user.getName().isEmpty()) {
+            user.setName(user.getLogin());
+        }
         return userStorage.update(user);
     }
 
