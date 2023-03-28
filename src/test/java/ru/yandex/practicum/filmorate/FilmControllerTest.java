@@ -55,16 +55,16 @@ public class FilmControllerTest {
 
     @Test
     void releaseDayExceptionTest() throws Exception {
-        mockMvc.perform(post("/films").
-                        contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"HarryPotter\"," +
+        mockMvc.perform(post("/films")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"HarryPotter\"," +
                                 "\"description\":\"Wizard Boy\",\"releaseDate\":\"1895-12-27\",\"duration\":100}"))
                 .andExpect(status().is4xxClientError());
     }
 
     @Test
     void notPositiveDurationExceptionTest() throws Exception {
-        mockMvc.perform(post("/films").
-                        contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"HarryPotter\"," +
+        mockMvc.perform(post("/films")
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"HarryPotter\"," +
                                 "\"description\":\"Wizard Boy\",\"releaseDate\":\"2000-01-01\",\"duration\":-100}"))
                 .andExpect(status().is4xxClientError());
     }
