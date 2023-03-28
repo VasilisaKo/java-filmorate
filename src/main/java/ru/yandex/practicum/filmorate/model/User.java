@@ -9,6 +9,7 @@ import javax.validation.constraints.Past;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+
 @Getter
 @Setter
 @EqualsAndHashCode
@@ -26,6 +27,7 @@ public class User {
     @Past(message = "Дата рождения не может быть в будущем")
     private final LocalDate birthday;
     private final Set<Integer> friends = new HashSet<>();
+
     public void setFriends(Integer friendId) {
         friends.add(friendId);
     }

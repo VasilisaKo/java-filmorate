@@ -20,6 +20,7 @@ public class FilmService {
     public FilmService(FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
     }
+
     public Film addLike(Integer filmId, Integer userId) {
         if (filmId < 0 || userId < 0) {
             log.error("Передан отрицатальный id");

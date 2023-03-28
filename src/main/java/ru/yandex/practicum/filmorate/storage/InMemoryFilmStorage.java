@@ -12,9 +12,10 @@ import java.util.Map;
 
 @Component
 @Slf4j
-public class InMemoryFilmStorage implements FilmStorage{
+public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
     private int filmId = 1;
+
     @Override
     public Film create(Film film) {
         film.setId(filmId++);
@@ -29,7 +30,7 @@ public class InMemoryFilmStorage implements FilmStorage{
             films.put(film.getId(), film);
             log.debug("Фильм обновлен: {}", film);
             return film;
-        }else {
+        } else {
             log.error("Фильм с id {} не найден", film.getId());
             throw new IncorrectParameterException("Фильм с id " + film.getId() + "не найден");
         }

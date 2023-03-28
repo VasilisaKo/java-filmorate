@@ -21,6 +21,7 @@ public class UserService {
     public UserService(UserStorage userStorage) {
         this.userStorage = userStorage;
     }
+
     public User addFriend(Integer userId, Integer friendId) {
         if (userId < 0 || friendId < 0) {
             log.error("Передан отрицатальный id");

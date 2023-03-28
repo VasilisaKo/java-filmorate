@@ -11,12 +11,14 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class FilmControllerTest {
     @Autowired
     private MockMvc mockMvc;
+
     @BeforeEach
     public void setUp() throws Exception {
         mockMvc.perform(post("/films")
@@ -25,7 +27,7 @@ public class FilmControllerTest {
                         "\"duration\":100}"));
     }
 
-   @Test
+    @Test
     void emptyNameExceptionTest() throws Exception {
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
