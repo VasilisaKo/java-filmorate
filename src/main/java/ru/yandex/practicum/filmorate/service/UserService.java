@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,9 +29,9 @@ public class UserService {
             throw new NotFoundException("Передан отрицатальный id");
         }
         User user = userStorage.getUserById(userId);
-        user.setFriends(friendId);
+        user.addFriend(friendId);
         User friend = userStorage.getUserById(friendId);
-        friend.setFriends(userId);
+        friend.addFriend(userId);
         return user;
     }
 
@@ -56,7 +57,7 @@ public class UserService {
         Set<Integer> resultList = new HashSet<>(listFriendToFriend);
         resultList.retainAll(listFriendUser);
         return resultList.stream()
-                .map(userStorage::getUserById)
+                .map(e -> userStorage.getUserById(e))
                 .collect(Collectors.toList());
     }
 
@@ -65,10 +66,15 @@ public class UserService {
             log.error("Передан отрицатальный id");
             throw new NotFoundException("Передан отрицатальный id");
         }
+        List<User> friends = new ArrayList<>();
         User user = userStorage.getUserById(userId);
         Set<Integer> listFriendUser = user.getFriends();
-        return listFriendUser.stream()
-                .map(userStorage::getUserById)
-                .collect(Collectors.toList());
+        if (user != null) {
+            friends =  listFriendUser.stream()
+                    .map(e -> userStorage.getUserById(e))
+                    .collect(Collectors.toList());
+        }
+
+        return friends;
     }
 }

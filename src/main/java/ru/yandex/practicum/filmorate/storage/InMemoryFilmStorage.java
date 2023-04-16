@@ -8,7 +8,9 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -49,5 +51,36 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
         log.debug("Фильм c id" + id + "не найден");
         throw new NotFoundException("Фильм c id" + id + "не найден");
+    }
+
+    @Override
+    public boolean deleteFilm(Film film) {
+        films.remove(film.getId());
+        return true;
+    }
+
+    @Override
+    public boolean addLike(int filmId, int userId) {
+        Film film = films.get(filmId);
+        film.addLikes(userId);
+        update(film);
+        return true;
+    }
+
+    @Override
+    public boolean deleteLike(int filmId, int userId) {
+        Film film = films.get(filmId);
+        film.deleteLikes(userId);
+        update(film);
+        return true;
+    }
+
+    @Override
+    public Collection<Film> getMostPopularFilms(int size) {
+        Collection<Film> mostPopularFilms = findAll().stream()
+                .sorted((f1, f2) -> f2.getLikes().size() - f1.getLikes().size())
+                .limit(size)
+                .collect(Collectors.toCollection(HashSet::new));
+        return mostPopularFilms;
     }
 }

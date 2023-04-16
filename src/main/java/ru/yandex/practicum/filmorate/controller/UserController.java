@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -55,7 +57,7 @@ public class UserController {
     public User update(@Valid @RequestBody User user) {
         if (user.getLogin().contains(" ")) {
             log.error("Логин не может содержать пробелы.");
-            throw new ValidationException("Логин не может содержать пробелы.");
+            throw new NotFoundException("Логин не может содержать пробелы.");
         }
         if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
