@@ -7,6 +7,9 @@ import lombok.Data;
 @AllArgsConstructor
 public class Mpa {
     private int id;
-    private final String name;
-    private final String description;
-}
+    private String name;
+    public Mpa(Integer id) {
+        this.id = id;
+    }
+ }
+

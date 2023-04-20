@@ -1,51 +1,65 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
+import javax.validation.ValidationException;
+import java.time.LocalDate;
+import java.util.*;
 
 @Service
-@Slf4j
+@RequiredArgsConstructor
 public class FilmService {
+    private static final LocalDate MIN_DATE = LocalDate.of(1895, 12, 28);
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
-    @Autowired
-    public FilmService(FilmStorage filmStorage) {
-        this.filmStorage = filmStorage;
+    public Film addFilm(Film film) {
+        if (film.getReleaseDate() == null || film.getReleaseDate().isAfter(MIN_DATE)) {
+            return filmStorage.addFilm(film);
+        } else throw new ValidationException("Некорректная дата выхода");
     }
 
-    public Film addLike(Integer filmId, Integer userId) {
-        if (filmId < 0 || userId < 0) {
-            log.error("Передан отрицатальный id");
-            throw new NotFoundException("Передан отрицатальный id");
-        }
-        Film film = filmStorage.getFilmById(filmId);
-        film.addLikes(userId);
-        return film;
+    public List<Film> getFilms() {
+        return filmStorage.getFilmsList();
     }
 
-    public Film deleteLike(Integer filmId, Integer userId) {
-        if (filmId < 0 || userId < 0) {
-            log.error("Передан отрицатальный id");
-            throw new NotFoundException("Передан отрицатальный id");
-        }
-        Film film = filmStorage.getFilmById(filmId);
-        film.getLikes().remove(userId);
-        return film;
+    public Film updateFilm(Film film) {
+        if (filmStorage.getById(film.getId()) != null) {
+            if (film.getReleaseDate() == null || film.getReleaseDate().isAfter(MIN_DATE)) {
+                return filmStorage.updateFilm(film);
+            } else throw new ValidationException("Некорректная дата выхода");
+        } else throw new NotFoundException("Фильм с данным id не найден");
     }
 
-    public List<Film> getPopularFilms(int count) {
-        return filmStorage.findAll().stream()
-                .sorted(Comparator.comparing(Film::countLikes).reversed())
-                .limit(count).collect(Collectors.toList());
+    public Film getFilmById(int id) {
+        if (filmStorage.getById(id) != null) {
+            return filmStorage.getById(id);
+        } else throw new NotFoundException("Фильм не найден");
     }
 
+    public void addLike(int filmId, int userId) {
+        if (filmStorage.getById(filmId) != null && userStorage.getById(userId) != null) {
+            filmStorage.addLike(userId, filmId);
+        } else throw new NotFoundException("Некорректный id пользователя/фильма");
+    }
 
+    public void removeLike(int filmId, int userId) {
+        if (filmStorage.getById(filmId) != null && userStorage.getById(userId) != null) {
+            filmStorage.removeLike(userId, filmId);
+        } else throw new NotFoundException("Некорректный id пользователя/фильма");
+    }
+
+    public List<Film> getPopular(int count) {
+        List<Film> films = new ArrayList<>(filmStorage.getFilmsList());
+        if (count != 1) count--;
+        if (count > films.size()) count = films.size();
+        films.sort((Comparator.comparingInt(o -> o.getLikes().size())));
+        Collections.reverse(films);
+        return films.subList(0,count);
+    }
 }

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+/*package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -51,7 +51,7 @@ public class InMemoryUserStorage implements UserStorage {
         }
         throw new NotFoundException("Пользователь c id" + id + "не найден");
     }
-    @Override
+   /* @Override
     public boolean addFriend(int userId, int friendId) {
         User user = users.get(userId);
         User friend = users.get(friendId);
@@ -66,4 +66,4 @@ public class InMemoryUserStorage implements UserStorage {
     public boolean deleteFriend(int userId, int friendId) {
         return false;
     }
-}
+}*/

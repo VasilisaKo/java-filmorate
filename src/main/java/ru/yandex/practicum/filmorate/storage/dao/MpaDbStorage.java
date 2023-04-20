@@ -1,48 +1,33 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
-import org.springframework.dao.EmptyResultDataAccessException;
+import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.MpaStorage;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
+import java.util.List;
 
 @Component
+@AllArgsConstructor
 public class MpaDbStorage implements MpaStorage {
     private final JdbcTemplate jdbcTemplate;
 
-    public MpaDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    @Override
+    public List<Mpa> getMpaList() {
+        String sql = "SELECT * FROM mpa";
+        return jdbcTemplate.query(sql,
+                (rs, rowNum) -> new Mpa(rs.getInt("mpa_id"), rs.getString("name")));
     }
 
     @Override
-    public Collection<Mpa> getAllMpa() {
-        String sqlMpa = "select * from RATINGMPA";
-        return jdbcTemplate.query(sqlMpa, this::makeMpa);
+    public Mpa getById(int id) {
+        String sql = "SELECT * FROM mpa WHERE mpa_id = ?";
+        SqlRowSet rows = jdbcTemplate.queryForRowSet(sql, id);
+        if (rows.next()) {
+            return new Mpa(id, rows.getString("name"));
+        } else throw new NotFoundException("Рейтинг не найден");
     }
-
-    @Override
-    public Mpa getMpaById(int mpaId) {
-        String sqlMpa = "select * from RATINGMPA where RATINGID = ?";
-        Mpa mpa;
-        try {
-            mpa = jdbcTemplate.queryForObject(sqlMpa, this::makeMpa, mpaId);
-        }
-        catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Возрастной рейтинг с идентификатором " +
-                    mpaId + " не зарегистрирован!");
-        }
-        return mpa;
-    }
-
-    private Mpa makeMpa(ResultSet resultSet, int rowNum) throws SQLException {
-        return new Mpa(resultSet.getInt("RatingID"),
-                resultSet.getString("Name"),
-                resultSet.getString("Description"));
-    }
-
 }

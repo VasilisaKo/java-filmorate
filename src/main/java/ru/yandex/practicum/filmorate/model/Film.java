@@ -2,19 +2,18 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class Film {
     private Integer id;
     @NotEmpty(message = "Название фильма не может быть пустым")
@@ -25,21 +24,18 @@ public class Film {
     private LocalDate releaseDate;
     @Min(value = 0, message = "Продолжительность фильма должна быть положительной")
     private int duration;
-    private int rate;
-    @NotNull
+    private Set<Integer> likes = new TreeSet<>();
+    private Set<Genre> genres = new TreeSet<>();
     private Mpa mpa;
-    private List<Genre> genres = new ArrayList<>();
-    private Set<Integer> likes = new HashSet<>();
 
-    public void addLikes(Integer idFriend) {
-        likes.add(idFriend);
-    }
-    public boolean deleteLikes(Integer userId) {
-        return likes.remove(userId);
-    }
-
-    public Integer countLikes() {
-        return likes.size();
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", name);
+        map.put("description", description);
+        map.put("release_date", releaseDate);
+        map.put("duration", duration);
+        if (mpa != null) map.put("mpa_id", mpa.getId());
+        return map;
     }
 }
 
