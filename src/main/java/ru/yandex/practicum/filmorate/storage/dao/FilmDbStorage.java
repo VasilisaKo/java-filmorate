@@ -106,6 +106,7 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "DELETE FROM likes WHERE user_id = ? AND film_id = ?";
         jdbcTemplate.update(sql, userId, filmId);
     }
+
     private Film createFilm(ResultSet resultSet, int row) throws SQLException {
         Film film = new Film();
         film.setId(resultSet.getInt("film_id"));
