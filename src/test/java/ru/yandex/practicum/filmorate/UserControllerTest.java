@@ -33,7 +33,7 @@ public class UserControllerTest {
     void emptyOrIncorrectEmailExceptionTest() throws Exception {
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"login\":\"vasilisaKo\",\"name\":\"vasilisa\",\"email\":\"vasilisagmail.com\"," +
+                        .content("{\"login\":\"vasilisaKo\",\"name\":\"vasilisa\",\"email\":\"vasilisalgmail.com\"," +
                                 "\"birthday\":\"1986-10-20\"}"))
                 .andExpect(status().is4xxClientError());
     }
