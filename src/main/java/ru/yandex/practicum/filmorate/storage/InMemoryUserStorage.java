@@ -1,4 +1,4 @@
-/*package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -6,10 +6,7 @@ import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -18,7 +15,7 @@ public class InMemoryUserStorage implements UserStorage {
     private int generateUserId = 1;
 
     @Override
-    public User create(User user) {
+    public User addUser(User user) {
         user.setId(generateUserId++);
         users.put(user.getId(), user);
         log.debug("Создан новый пользователь: {}", user);
@@ -26,7 +23,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User update(User user) {
+    public User updateUser(User user) {
 
         if (users.containsKey(user.getId())) {
             users.put(user.getId(), user);
@@ -39,31 +36,36 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Collection<User> findAll() {
+    public List<User> getUsersList() {
         log.debug("Текущее количество пользователей: {}", users.size());
-        return users.values();
+        return new ArrayList<>(users.values());
     }
 
     @Override
-    public User getUserById(int id) {
+    public User getById(int id) {
         if (users.containsKey(id)) {
             return users.get(id);
         }
         throw new NotFoundException("Пользователь c id" + id + "не найден");
     }
-   /* @Override
-    public boolean addFriend(int userId, int friendId) {
+
+    @Override
+    public void addFriend(int userId, int friendId) {
         User user = users.get(userId);
         User friend = users.get(friendId);
-        user.addFriend(friendId);
-        friend.addFriend(userId);
-        update(user);
-        update(friend);
-        return true;
+        user.getFriends().add(friendId);
+        friend.getFriends().add(userId);
+        updateUser(user);
+        updateUser(friend);
     }
 
     @Override
-    public boolean deleteFriend(int userId, int friendId) {
-        return false;
+    public void deleteFriend(int userId, int friendId) {
+        User user = users.get(userId);
+        User friend = users.get(friendId);
+        user.getFriends().remove(friendId);
+        friend.getFriends().remove(userId);
+        updateUser(user);
+        updateUser(friend);
     }
-}*/
+}
